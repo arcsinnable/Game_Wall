@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Game Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #1a1a1c;
+    --surface2: #242426;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0ede8;
+    --text-muted: #888683;
+    --text-dim: #555350;
+    --accent: #c8a96e;
+    --accent-dim: rgba(200, 169, 110, 0.15);
+    --score-1: #e8604c;
+    --score-2: #e8964c;
+    --score-3: #e8c44c;
+    --score-4: #a8d458;
+    --score-5: #58d48a;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 80px;
+  }
+
+  header {
+    padding: 60px 40px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .header-left p {
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 14px;
+    letter-spacing: 0.04em;
+  }
+
+  .stats {
+    display: flex;
+    gap: 32px;
+  }
+
+  .stat {
+    text-align: right;
+  }
+
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 400;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .divider {
+    max-width: 1200px;
+    margin: 0 auto 40px;
+    padding: 0 40px;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .filters {
+    max-width: 1200px;
+    margin: 0 auto 32px;
+    padding: 0 40px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
+
+  .filter-btn {
+    background: transparent;
+    border: 0.5px solid var(--border);
+    color: var(--text-muted);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+  }
+
+  .filter-btn:hover {
+    border-color: rgba(255,255,255,0.2);
+    color: var(--text);
+  }
+
+  .filter-btn.active {
+    background: var(--accent-dim);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s;
+    position: relative;
+  }
+
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,0.16);
+  }
+
+  .card-cover {
+    width: 100%;
+    aspect-ratio: 3/4;
+    object-fit: cover;
+    display: block;
+    background: var(--surface2);
+  }
+
+  .card-cover-fallback {
+    width: 100%;
+    aspect-ratio: 3/4;
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+  }
+
+  .card-status {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .status-finished { background: rgba(88, 212, 138, 0.2); color: #58d48a; border: 0.5px solid rgba(88,212,138,0.3); }
+  .status-playing  { background: rgba(200, 169, 110, 0.2); color: var(--accent); border: 0.5px solid rgba(200,169,110,0.3); }
+  .status-dropped  { background: rgba(232, 96, 76, 0.15); color: #e8604c; border: 0.5px solid rgba(232,96,76,0.2); }
+  .status-backlog  { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 0.5px solid var(--border); }
+
+  .card-body {
+    padding: 14px 16px 16px;
+  }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  .card-meta {
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-score {
+    display: flex;
+    gap: 2px;
+    margin-top: 10px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+  }
+
+  .dot.filled-1 { background: var(--score-1); border-color: var(--score-1); }
+  .dot.filled-2 { background: var(--score-2); border-color: var(--score-2); }
+  .dot.filled-3 { background: var(--score-3); border-color: var(--score-3); }
+  .dot.filled-4 { background: var(--score-4); border-color: var(--score-4); }
+  .dot.filled-5 { background: var(--score-5); border-color: var(--score-5); }
+
+  /* Modal */
+  .modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal-bg.open { display: flex; }
+
+  .modal {
+    background: var(--surface);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    max-width: 560px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .modal-hero {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    border-radius: 16px 16px 0 0;
+    display: block;
+    background: var(--surface2);
+  }
+
+  .modal-content {
+    padding: 24px 28px 28px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    gap: 16px;
+  }
+
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .modal-close {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .modal-close:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+
+  .modal-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+
+  .tag {
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 0.5px solid var(--border);
+  }
+
+  .modal-score-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .modal-score-label {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .modal-dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .modal-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+  }
+
+  .modal-score-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--accent);
+  }
+
+  .modal-review {
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--text-muted);
+    border-left: 2px solid var(--accent);
+    padding-left: 16px;
+  }
+
+  .modal-date {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* Add button */
+  .add-btn {
+    position: fixed;
+    bottom: 36px;
+    right: 40px;
+    background: var(--accent);
+    color: #0e0e0f;
+    border: none;
+    border-radius: 28px;
+    padding: 12px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 24px rgba(200,169,110,0.25);
+    transition: all 0.2s;
+    z-index: 50;
+  }
+
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.35); }
+
+  /* Add Form Modal */
+  .form-modal-bg {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.8);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    backdrop-filter: blur(4px);
+  }
+
+  .form-modal-bg.open { display: flex; }
+
+  .form-modal {
+    background: var(--surface);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    max-width: 480px;
+    width: 100%;
+    padding: 28px;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .form-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: rgba(200,169,110,0.5);
+  }
+
+  .form-select option { background: var(--surface); }
+
+  .form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+
+  .score-picker {
+    display: flex;
+    gap: 8px;
+  }
+
+  .score-option {
+    flex: 1;
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    padding: 8px 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .score-option:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .score-option.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+  }
+
+  .btn-cancel {
+    flex: 1;
+    background: transparent;
+    border: 0.5px solid var(--border);
+    color: var(--text-muted);
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-cancel:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+
+  .btn-save {
+    flex: 2;
+    background: var(--accent);
+    border: none;
+    color: #0e0e0f;
+    padding: 10px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-save:hover { opacity: 0.9; }
+
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--text-dim);
+    grid-column: 1 / -1;
+  }
+
+  .empty-state p { font-size: 14px; margin-top: 8px; }
+
+  @media (max-width: 600px) {
+    header, .divider, .filters, .grid { padding-left: 20px; padding-right: 20px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+    .add-btn { bottom: 24px; right: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Game Wall</h1>
+    <p id="subtitle">arcsinnable · 游戏记录</p>
+  </div>
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-total">0</div>
+      <div class="stat-label">games</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-finished">0</div>
+      <div class="stat-label">finished</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-avg">—</div>
+      <div class="stat-label">avg score</div>
+    </div>
+  </div>
+</header>
+
+<div class="divider"></div>
+
+<div class="filters">
+  <span class="filter-label">filter</span>
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="finished">Finished</button>
+  <button class="filter-btn" data-filter="playing">Playing</button>
+  <button class="filter-btn" data-filter="dropped">Dropped</button>
+  <button class="filter-btn" data-filter="backlog">Backlog</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<!-- View modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal" id="modal">
+    <img class="modal-hero" id="modal-cover" src="" alt="">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title"></div>
+        <button class="modal-close" id="modal-close">✕</button>
+      </div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <div class="modal-score-row" id="modal-score-row"></div>
+      <div class="modal-review" id="modal-review"></div>
+      <div class="modal-date" id="modal-date"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Add form modal -->
+<div class="form-modal-bg" id="form-modal-bg">
+  <div class="form-modal">
+    <div class="form-title">添加游戏</div>
+
+    <div class="form-group">
+      <label class="form-label">游戏名称</label>
+      <input class="form-input" id="f-title" placeholder="e.g. 艾尔登法环" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">封面图片 URL</label>
+      <input class="form-input" id="f-cover" placeholder="Steam CDN 或其他图片链接" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">平台 / 年份</label>
+      <input class="form-input" id="f-meta" placeholder="e.g. PC · 2022" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">状态</label>
+      <select class="form-select" id="f-status">
+        <option value="finished">Finished</option>
+        <option value="playing">Playing</option>
+        <option value="dropped">Dropped</option>
+        <option value="backlog">Backlog</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">评分 (1–10)</label>
+      <div class="score-picker" id="score-picker">
+        <button class="score-option" data-v="2">2</button>
+        <button class="score-option" data-v="4">4</button>
+        <button class="score-option" data-v="6">6</button>
+        <button class="score-option" data-v="8">8</button>
+        <button class="score-option" data-v="10">10</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">感想 / 短评</label>
+      <textarea class="form-textarea" id="f-review" placeholder="写点什么…"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">完成日期</label>
+      <input class="form-input" id="f-date" type="date" />
+    </div>
+
+    <div class="form-actions">
+      <button class="btn-cancel" id="form-cancel">取消</button>
+      <button class="btn-save" id="form-save">保存</button>
+    </div>
+  </div>
+</div>
+
+<button class="add-btn" id="add-btn">
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+    <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>
+  添加游戏
+</button>
+
+<script>
+const STORAGE_KEY = 'gamewall_games_v1';
+
+const DEFAULT_GAMES = [
+  {
+    id: 1,
+    title: '艾尔登法环',
+    cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/library_600x900.jpg',
+    meta: 'PC · 2022',
+    status: 'finished',
+    score: 10,
+    review: '难度劝退了很多人，但打过之后的成就感无与伦比。马利凯亚的战斗可能是我玩过最精彩的 Boss 战之一。开放世界设计极其克制，几乎没有废料内容，每一个角落都藏着值得探索的惊喜。',
+    date: '2022-06-12'
+  },
+  {
+    id: 2,
+    title: '博德之门3',
+    cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1086940/library_600x900.jpg',
+    meta: 'PC · 2023',
+    status: 'finished',
+    score: 9,
+    review: '现代 RPG 的标杆。叙事密度、分支深度、角色塑造都达到了一个新的高度。每次读档重新选择都有截然不同的体验，单周目时长超过 120 小时仍意犹未尽。',
+    date: '2023-11-04'
+  }
+];
+
+let games = [];
+let currentFilter = 'all';
+let selectedScore = null;
+let editingId = null;
+
+function loadGames() {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      games = JSON.parse(stored);
+    } else {
+      games = DEFAULT_GAMES;
+      saveGames();
+    }
+  } catch(e) {
+    games = DEFAULT_GAMES;
+  }
+}
+
+function saveGames() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
+}
+
+function getScoreClass(score) {
+  if (score <= 2) return 'filled-1';
+  if (score <= 4) return 'filled-2';
+  if (score <= 6) return 'filled-3';
+  if (score <= 8) return 'filled-4';
+  return 'filled-5';
+}
+
+function getStatusLabel(status) {
+  const map = { finished: 'Finished', playing: 'Playing', dropped: 'Dropped', backlog: 'Backlog' };
+  return map[status] || status;
+}
+
+function renderDots(score, size = 'small') {
+  const total = 10;
+  const cls = getScoreClass(score);
+  let html = '';
+  for (let i = 1; i <= total; i++) {
+    html += `<div class="${size === 'small' ? 'dot' : 'modal-dot'} ${i <= score ? cls : ''}"></div>`;
+  }
+  return html;
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  const filtered = currentFilter === 'all' ? games : games.filter(g => g.status === currentFilter);
+
+  updateStats();
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state"><div style="font-size:32px">🎮</div><p>还没有游戏，点击右下角添加吧</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(g => `
+    <div class="card" data-id="${g.id}">
+      ${g.cover
+        ? `<img class="card-cover" src="${g.cover}" alt="${g.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        : ''
+      }
+      <div class="card-cover-fallback" style="${g.cover ? 'display:none' : ''}">🎮</div>
+      <div class="card-status status-${g.status}">${getStatusLabel(g.status)}</div>
+      <div class="card-body">
+        <div class="card-title">${g.title}</div>
+        <div class="card-meta"><span>${g.meta || ''}</span></div>
+        ${g.score ? `<div class="card-score">${renderDots(g.score)}</div>` : ''}
+      </div>
+    </div>
+  `).join('');
+
+  grid.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', () => {
+      const game = games.find(g => g.id == card.dataset.id);
+      if (game) openModal(game);
+    });
+  });
+}
+
+function updateStats() {
+  const total = games.length;
+  const finished = games.filter(g => g.status === 'finished').length;
+  const scored = games.filter(g => g.score);
+  const avg = scored.length ? (scored.reduce((a, g) => a + g.score, 0) / scored.length).toFixed(1) : '—';
+  document.getElementById('stat-total').textContent = total;
+  document.getElementById('stat-finished').textContent = finished;
+  document.getElementById('stat-avg').textContent = avg;
+}
+
+function openModal(game) {
+  const bg = document.getElementById('modal-bg');
+  const cover = document.getElementById('modal-cover');
+  cover.src = game.cover || '';
+  cover.style.display = game.cover ? 'block' : 'none';
+  document.getElementById('modal-title').textContent = game.title;
+
+  const tagsEl = document.getElementById('modal-tags');
+  tagsEl.innerHTML = [
+    game.meta ? `<span class="tag">${game.meta}</span>` : '',
+    `<span class="tag status-${game.status}">${getStatusLabel(game.status)}</span>`
+  ].join('');
+
+  const scoreRow = document.getElementById('modal-score-row');
+  if (game.score) {
+    scoreRow.innerHTML = `
+      <span class="modal-score-label">Score</span>
+      <div class="modal-dots">${renderDots(game.score, 'modal')}</div>
+      <span class="modal-score-text">${game.score}/10</span>
+    `;
+  } else {
+    scoreRow.innerHTML = '';
+  }
+
+  document.getElementById('modal-review').textContent = game.review || '';
+  document.getElementById('modal-date').textContent = game.date ? `完成于 ${game.date}` : '';
+
+  bg.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function openForm() {
+  editingId = null;
+  selectedScore = null;
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-cover').value = '';
+  document.getElementById('f-meta').value = '';
+  document.getElementById('f-status').value = 'finished';
+  document.getElementById('f-review').value = '';
+  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('.score-option').forEach(b => b.classList.remove('selected'));
+  document.getElementById('form-modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeForm() {
+  document.getElementById('form-modal-bg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function saveForm() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { alert('请填写游戏名称'); return; }
+
+  const game = {
+    id: editingId || Date.now(),
+    title,
+    cover: document.getElementById('f-cover').value.trim(),
+    meta: document.getElementById('f-meta').value.trim(),
+    status: document.getElementById('f-status').value,
+    score: selectedScore,
+    review: document.getElementById('f-review').value.trim(),
+    date: document.getElementById('f-date').value
+  };
+
+  if (editingId) {
+    const idx = games.findIndex(g => g.id === editingId);
+    if (idx > -1) games[idx] = game;
+  } else {
+    games.unshift(game);
+  }
+
+  saveGames();
+  renderGrid();
+  closeForm();
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-bg').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+document.getElementById('add-btn').addEventListener('click', openForm);
+document.getElementById('form-cancel').addEventListener('click', closeForm);
+document.getElementById('form-modal-bg').addEventListener('click', e => { if (e.target === e.currentTarget) closeForm(); });
+document.getElementById('form-save').addEventListener('click', saveForm);
+
+document.querySelectorAll('.score-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedScore = parseInt(btn.dataset.v);
+    document.querySelectorAll('.score-option').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  });
+});
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderGrid();
+  });
+});
+
+loadGames();
+renderGrid();
+</script>
+</body>
+</html>
