@@ -18,12 +18,15 @@
     --text-muted: #888683;
     --text-dim: #555350;
     --accent: #c8a96e;
-    --accent-dim: rgba(200, 169, 110, 0.15);
-    --score-1: #e8604c;
-    --score-2: #e8964c;
-    --score-3: #e8c44c;
-    --score-4: #a8d458;
-    --score-5: #58d48a;
+    --accent-dim: rgba(200,169,110,0.15);
+    --tier-a: #e8c86e;
+    --tier-a-dim: rgba(232,200,110,0.15);
+    --tier-b: #6eaee8;
+    --tier-b-dim: rgba(110,174,232,0.15);
+    --tier-c: #6ed48a;
+    --tier-c-dim: rgba(110,212,138,0.15);
+    --tier-d: #555350;
+    --tier-d-dim: rgba(85,83,80,0.2);
   }
 
   body {
@@ -32,7 +35,7 @@
     font-family: 'DM Sans', sans-serif;
     font-weight: 300;
     min-height: 100vh;
-    padding: 0 0 80px;
+    padding: 0 0 100px;
   }
 
   header {
@@ -45,500 +48,211 @@
     gap: 24px;
     flex-wrap: wrap;
   }
-
   .header-left h1 {
     font-family: 'Playfair Display', serif;
     font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 600;
     letter-spacing: -0.02em;
-    color: var(--text);
   }
+  .header-left p { margin-top: 8px; color: var(--text-muted); font-size: 14px; letter-spacing: 0.04em; }
+  .stats { display: flex; gap: 32px; }
+  .stat { text-align: right; }
+  .stat-num { font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 400; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
 
-  .header-left p {
-    margin-top: 8px;
-    color: var(--text-muted);
-    font-size: 14px;
-    letter-spacing: 0.04em;
-  }
+  .divider { max-width: 1200px; margin: 0 auto 28px; padding: 0 40px; border-top: 0.5px solid var(--border); }
 
-  .stats {
-    display: flex;
-    gap: 32px;
+  .filter-row {
+    max-width: 1200px; margin: 0 auto 10px; padding: 0 40px;
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
   }
-
-  .stat {
-    text-align: right;
-  }
-
-  .stat-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 400;
-    color: var(--accent);
-    line-height: 1;
-  }
-
-  .stat-label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-top: 4px;
-  }
-
-  .divider {
-    max-width: 1200px;
-    margin: 0 auto 40px;
-    padding: 0 40px;
-    border-top: 0.5px solid var(--border);
-  }
-
-  .filters {
-    max-width: 1200px;
-    margin: 0 auto 32px;
-    padding: 0 40px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-
-  .filter-label {
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-right: 8px;
-  }
+  .filter-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-right: 4px; min-width: 32px; }
 
   .filter-btn {
-    background: transparent;
-    border: 0.5px solid var(--border);
-    color: var(--text-muted);
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    transition: all 0.2s;
-    letter-spacing: 0.02em;
+    background: transparent; border: 0.5px solid var(--border); color: var(--text-muted);
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; transition: all 0.18s; letter-spacing: 0.02em;
   }
+  .filter-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+  .filter-btn.fa.active { background: var(--tier-a-dim); border-color: var(--tier-a); color: var(--tier-a); }
+  .filter-btn.fb.active { background: var(--tier-b-dim); border-color: var(--tier-b); color: var(--tier-b); }
+  .filter-btn.fc.active { background: var(--tier-c-dim); border-color: var(--tier-c); color: var(--tier-c); }
+  .filter-btn.fd.active { background: var(--tier-d-dim); border-color: var(--tier-d); color: var(--text-muted); }
 
-  .filter-btn:hover {
-    border-color: rgba(255,255,255,0.2);
-    color: var(--text);
+  .date-row {
+    max-width: 1200px; margin: 0 auto 28px; padding: 0 40px;
+    display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
   }
-
-  .filter-btn.active {
-    background: var(--accent-dim);
-    border-color: var(--accent);
-    color: var(--accent);
+  .date-sel {
+    background: var(--surface2); border: 0.5px solid var(--border); color: var(--text-muted);
+    padding: 5px 28px 5px 12px; border-radius: 20px; font-size: 12px; font-family: 'DM Sans', sans-serif;
+    cursor: pointer; outline: none; transition: border-color 0.18s; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23555350' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
   }
+  .date-sel:focus { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .date-sel option { background: #1a1a1c; }
 
   .grid {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px;
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 20px;
+    max-width: 1200px; margin: 0 auto; padding: 0 40px;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 18px;
   }
 
   .card {
-    background: var(--surface);
-    border: 0.5px solid var(--border);
-    border-radius: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1), border-color 0.2s;
-    position: relative;
+    background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px;
+    overflow: hidden; transition: transform 0.25s cubic-bezier(0.23,1,0.32,1), border-color 0.2s;
+    position: relative; cursor: pointer;
   }
+  .card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.16); }
+  .card-cover { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; background: var(--surface2); }
+  .card-cover-fallback { width: 100%; aspect-ratio: 3/4; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 40px; }
 
-  .card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(255,255,255,0.16);
+  .card-tier {
+    position: absolute; top: 10px; left: 10px; width: 26px; height: 26px;
+    border-radius: 6px; display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; font-family: 'Playfair Display', serif;
   }
-
-  .card-cover {
-    width: 100%;
-    aspect-ratio: 3/4;
-    object-fit: cover;
-    display: block;
-    background: var(--surface2);
-  }
-
-  .card-cover-fallback {
-    width: 100%;
-    aspect-ratio: 3/4;
-    background: var(--surface2);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 40px;
-  }
+  .tb-a { background: rgba(232,200,110,0.25); color: var(--tier-a); border: 0.5px solid rgba(232,200,110,0.4); }
+  .tb-b { background: rgba(110,174,232,0.2); color: var(--tier-b); border: 0.5px solid rgba(110,174,232,0.35); }
+  .tb-c { background: rgba(110,212,138,0.15); color: var(--tier-c); border: 0.5px solid rgba(110,212,138,0.3); }
+  .tb-d { background: rgba(85,83,80,0.25); color: var(--text-dim); border: 0.5px solid rgba(85,83,80,0.3); }
 
   .card-status {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 10px;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-weight: 500;
+    position: absolute; top: 10px; right: 10px;
+    font-size: 10px; letter-spacing: 0.07em; text-transform: uppercase;
+    padding: 3px 8px; border-radius: 4px; font-weight: 500;
   }
+  .st-finished { background: rgba(88,212,138,0.15); color: #58d48a; border: 0.5px solid rgba(88,212,138,0.25); }
+  .st-playing  { background: rgba(200,169,110,0.15); color: var(--accent); border: 0.5px solid rgba(200,169,110,0.25); }
+  .st-dropped  { background: rgba(232,96,76,0.12); color: #e8604c; border: 0.5px solid rgba(232,96,76,0.2); }
+  .st-backlog  { background: rgba(255,255,255,0.04); color: var(--text-dim); border: 0.5px solid var(--border); }
 
-  .status-finished { background: rgba(88, 212, 138, 0.2); color: #58d48a; border: 0.5px solid rgba(88,212,138,0.3); }
-  .status-playing  { background: rgba(200, 169, 110, 0.2); color: var(--accent); border: 0.5px solid rgba(200,169,110,0.3); }
-  .status-dropped  { background: rgba(232, 96, 76, 0.15); color: #e8604c; border: 0.5px solid rgba(232,96,76,0.2); }
-  .status-backlog  { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 0.5px solid var(--border); }
-
-  .card-body {
-    padding: 14px 16px 16px;
+  .card-edit {
+    position: absolute; bottom: 52px; right: 9px; width: 27px; height: 27px;
+    background: rgba(14,14,15,0.88); border: 0.5px solid rgba(255,255,255,0.15);
+    border-radius: 6px; color: var(--text-muted); font-size: 11px;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity 0.18s; cursor: pointer; z-index: 5;
   }
+  .card:hover .card-edit { opacity: 1; }
+  .card-edit:hover { color: var(--text); border-color: rgba(255,255,255,0.3); }
 
-  .card-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--text);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    line-height: 1.3;
-  }
+  .card-body { padding: 11px 13px 13px; }
+  .card-title { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
+  .card-meta { margin-top: 3px; font-size: 11px; color: var(--text-dim); }
+  .card-date { margin-top: 2px; font-size: 10px; color: var(--text-dim); }
 
-  .card-meta {
-    margin-top: 4px;
-    font-size: 11px;
-    color: var(--text-dim);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .card-score {
-    display: flex;
-    gap: 2px;
-    margin-top: 10px;
-  }
-
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 0.5px solid var(--border);
-  }
-
-  .dot.filled-1 { background: var(--score-1); border-color: var(--score-1); }
-  .dot.filled-2 { background: var(--score-2); border-color: var(--score-2); }
-  .dot.filled-3 { background: var(--score-3); border-color: var(--score-3); }
-  .dot.filled-4 { background: var(--score-4); border-color: var(--score-4); }
-  .dot.filled-5 { background: var(--score-5); border-color: var(--score-5); }
-
-  /* Modal */
+  /* View Modal */
   .modal-bg {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    backdrop-filter: blur(4px);
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.78);
+    z-index: 100; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px);
   }
-
   .modal-bg.open { display: flex; }
-
   .modal {
-    background: var(--surface);
-    border: 0.5px solid rgba(255,255,255,0.12);
-    border-radius: 16px;
-    max-width: 560px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    position: relative;
+    background: var(--surface); border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 16px; max-width: 540px; width: 100%; max-height: 90vh; overflow-y: auto;
   }
-
-  .modal-hero {
-    width: 100%;
-    height: 220px;
-    object-fit: cover;
-    border-radius: 16px 16px 0 0;
-    display: block;
-    background: var(--surface2);
+  .modal-hero { width: 100%; height: 200px; object-fit: cover; border-radius: 16px 16px 0 0; display: block; background: var(--surface2); }
+  .modal-content { padding: 22px 26px 26px; }
+  .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; gap: 16px; }
+  .modal-title-wrap { display: flex; align-items: center; gap: 10px; }
+  .modal-tier-badge {
+    width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 600; font-family: 'Playfair Display', serif; flex-shrink: 0;
   }
-
-  .modal-content {
-    padding: 24px 28px 28px;
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 16px;
-    gap: 16px;
-  }
-
-  .modal-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text);
-    line-height: 1.2;
-  }
-
+  .modal-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; line-height: 1.2; }
   .modal-close {
-    background: var(--surface2);
-    border: 0.5px solid var(--border);
-    color: var(--text-muted);
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: all 0.15s;
+    background: var(--surface2); border: 0.5px solid var(--border); color: var(--text-muted);
+    width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s;
   }
-
-  .modal-close:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
-
-  .modal-tags {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 18px;
+  .modal-close:hover { color: var(--text); }
+  .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+  .tag { font-size: 11px; padding: 3px 10px; border-radius: 4px; background: var(--surface2); color: var(--text-muted); border: 0.5px solid var(--border); }
+  .tier-desc-box {
+    background: var(--surface2); border-radius: 8px; padding: 10px 14px; margin-bottom: 14px;
+    font-size: 12px; color: var(--text-muted); line-height: 1.65; border-left: 2px solid transparent;
   }
-
-  .tag {
-    font-size: 11px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    letter-spacing: 0.04em;
-    background: var(--surface2);
-    color: var(--text-muted);
-    border: 0.5px solid var(--border);
+  .tdb-a { border-left-color: var(--tier-a); }
+  .tdb-b { border-left-color: var(--tier-b); }
+  .tdb-c { border-left-color: var(--tier-c); }
+  .tdb-d { border-left-color: var(--tier-d); }
+  .modal-review { font-size: 14px; line-height: 1.8; color: var(--text-muted); border-left: 2px solid var(--accent); padding-left: 14px; }
+  .modal-date { margin-top: 16px; font-size: 11px; color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase; }
+  .modal-edit-btn {
+    margin-top: 18px; background: var(--surface2); border: 0.5px solid var(--border); color: var(--text-muted);
+    padding: 7px 18px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px;
+    cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
   }
+  .modal-edit-btn:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
 
-  .modal-score-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 18px;
-  }
-
-  .modal-score-label {
-    font-size: 12px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  .modal-dots {
-    display: flex;
-    gap: 4px;
-  }
-
-  .modal-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 0.5px solid var(--border);
-  }
-
-  .modal-score-text {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    color: var(--accent);
-  }
-
-  .modal-review {
-    font-size: 14px;
-    line-height: 1.8;
-    color: var(--text-muted);
-    border-left: 2px solid var(--accent);
-    padding-left: 16px;
-  }
-
-  .modal-date {
-    margin-top: 20px;
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-  }
-
-  /* Add button */
-  .add-btn {
-    position: fixed;
-    bottom: 36px;
-    right: 40px;
-    background: var(--accent);
-    color: #0e0e0f;
-    border: none;
-    border-radius: 28px;
-    padding: 12px 24px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 24px rgba(200,169,110,0.25);
-    transition: all 0.2s;
-    z-index: 50;
-  }
-
-  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.35); }
-
-  /* Add Form Modal */
+  /* Form Modal */
   .form-modal-bg {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.8);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    backdrop-filter: blur(4px);
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.82);
+    z-index: 200; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(4px);
   }
-
   .form-modal-bg.open { display: flex; }
-
   .form-modal {
-    background: var(--surface);
-    border: 0.5px solid rgba(255,255,255,0.12);
-    border-radius: 16px;
-    max-width: 480px;
-    width: 100%;
-    padding: 28px;
-    max-height: 90vh;
-    overflow-y: auto;
+    background: var(--surface); border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: 16px; max-width: 460px; width: 100%; padding: 26px; max-height: 92vh; overflow-y: auto;
   }
-
-  .form-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    margin-bottom: 24px;
-    color: var(--text);
-  }
-
-  .form-group {
-    margin-bottom: 18px;
-  }
-
-  .form-label {
-    display: block;
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
+  .form-title { font-family: 'Playfair Display', serif; font-size: 1.3rem; margin-bottom: 20px; }
+  .form-group { margin-bottom: 15px; }
+  .form-label { display: block; font-size: 11px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px; }
   .form-input, .form-select, .form-textarea {
-    width: 100%;
-    background: var(--surface2);
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    padding: 10px 14px;
-    transition: border-color 0.2s;
-    outline: none;
+    width: 100%; background: var(--surface2); border: 0.5px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 9px 12px;
+    transition: border-color 0.18s; outline: none;
   }
+  .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: rgba(200,169,110,0.45); }
+  .form-select option { background: #1a1a1c; }
+  .form-textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
 
-  .form-input:focus, .form-select:focus, .form-textarea:focus {
-    border-color: rgba(200,169,110,0.5);
+  .tier-picker { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .tier-opt {
+    background: var(--surface2); border: 0.5px solid var(--border); border-radius: 10px;
+    padding: 10px 6px; cursor: pointer; text-align: center; transition: all 0.15s; user-select: none;
   }
+  .tier-opt:hover { border-color: rgba(255,255,255,0.18); }
+  .tier-opt-letter { font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+  .tier-opt-desc { font-size: 9px; color: var(--text-dim); line-height: 1.4; }
+  .ta .tier-opt-letter { color: var(--tier-a); } .ta.sel { background: var(--tier-a-dim); border-color: var(--tier-a); }
+  .tb .tier-opt-letter { color: var(--tier-b); } .tb.sel { background: var(--tier-b-dim); border-color: var(--tier-b); }
+  .tc .tier-opt-letter { color: var(--tier-c); } .tc.sel { background: var(--tier-c-dim); border-color: var(--tier-c); }
+  .td .tier-opt-letter { color: var(--tier-d); } .td.sel { background: var(--tier-d-dim); border-color: var(--tier-d); }
 
-  .form-select option { background: var(--surface); }
-
-  .form-textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
-
-  .score-picker {
-    display: flex;
-    gap: 8px;
-  }
-
-  .score-option {
-    flex: 1;
-    background: var(--surface2);
-    border: 0.5px solid var(--border);
-    border-radius: 8px;
-    color: var(--text-muted);
-    font-size: 13px;
-    font-family: 'DM Sans', sans-serif;
-    padding: 8px 4px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.15s;
-  }
-
-  .score-option:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-  .score-option.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-
-  .form-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 24px;
-  }
-
+  .form-actions { display: flex; gap: 8px; margin-top: 20px; }
   .btn-cancel {
-    flex: 1;
-    background: transparent;
-    border: 0.5px solid var(--border);
-    color: var(--text-muted);
-    padding: 10px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all 0.15s;
+    flex: 1; background: transparent; border: 0.5px solid var(--border); color: var(--text-muted);
+    padding: 9px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.15s;
   }
-
   .btn-cancel:hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
-
+  .btn-delete {
+    flex: 1; background: rgba(232,96,76,0.1); border: 0.5px solid rgba(232,96,76,0.25); color: #e8604c;
+    padding: 9px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; cursor: pointer; transition: all 0.15s; display: none;
+  }
+  .btn-delete:hover { background: rgba(232,96,76,0.18); }
   .btn-save {
-    flex: 2;
-    background: var(--accent);
-    border: none;
-    color: #0e0e0f;
-    padding: 10px;
-    border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s;
+    flex: 2; background: var(--accent); border: none; color: #0e0e0f;
+    padding: 9px; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s;
   }
+  .btn-save:hover { opacity: 0.88; }
 
-  .btn-save:hover { opacity: 0.9; }
-
-  .empty-state {
-    text-align: center;
-    padding: 80px 40px;
-    color: var(--text-dim);
-    grid-column: 1 / -1;
+  .add-btn {
+    position: fixed; bottom: 36px; right: 40px; background: var(--accent); color: #0e0e0f;
+    border: none; border-radius: 28px; padding: 11px 22px; font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 7px;
+    box-shadow: 0 4px 24px rgba(200,169,110,0.22); transition: all 0.2s; z-index: 50;
   }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,169,110,0.32); }
 
-  .empty-state p { font-size: 14px; margin-top: 8px; }
+  .empty-state { text-align: center; padding: 80px 40px; color: var(--text-dim); grid-column: 1/-1; font-size: 14px; }
 
   @media (max-width: 600px) {
-    header, .divider, .filters, .grid { padding-left: 20px; padding-right: 20px; }
-    .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
-    .add-btn { bottom: 24px; right: 20px; }
+    header, .divider, .filter-row, .date-row, .grid { padding-left: 18px; padding-right: 18px; }
+    .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+    .add-btn { bottom: 20px; right: 18px; }
   }
 </style>
 </head>
@@ -547,344 +261,289 @@
 <header>
   <div class="header-left">
     <h1>Game Wall</h1>
-    <p id="subtitle">arcsinnable · 游戏记录</p>
+    <p>arcsinnable · 游戏记录</p>
   </div>
   <div class="stats">
-    <div class="stat">
-      <div class="stat-num" id="stat-total">0</div>
-      <div class="stat-label">games</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num" id="stat-finished">0</div>
-      <div class="stat-label">finished</div>
-    </div>
-    <div class="stat">
-      <div class="stat-num" id="stat-avg">—</div>
-      <div class="stat-label">avg score</div>
-    </div>
+    <div class="stat"><div class="stat-num" id="stat-total">0</div><div class="stat-label">games</div></div>
+    <div class="stat"><div class="stat-num" id="stat-finished">0</div><div class="stat-label">finished</div></div>
+    <div class="stat"><div class="stat-num" id="stat-a">0</div><div class="stat-label">tier A</div></div>
   </div>
 </header>
 
 <div class="divider"></div>
 
-<div class="filters">
-  <span class="filter-label">filter</span>
-  <button class="filter-btn active" data-filter="all">All</button>
-  <button class="filter-btn" data-filter="finished">Finished</button>
-  <button class="filter-btn" data-filter="playing">Playing</button>
-  <button class="filter-btn" data-filter="dropped">Dropped</button>
-  <button class="filter-btn" data-filter="backlog">Backlog</button>
+<div class="filter-row">
+  <span class="filter-label">状态</span>
+  <button class="filter-btn active" data-status="all">全部</button>
+  <button class="filter-btn" data-status="finished">Finished</button>
+  <button class="filter-btn" data-status="playing">Playing</button>
+  <button class="filter-btn" data-status="dropped">Dropped</button>
+  <button class="filter-btn" data-status="backlog">Backlog</button>
+</div>
+
+<div class="filter-row">
+  <span class="filter-label">档位</span>
+  <button class="filter-btn active" data-tier="all">全部</button>
+  <button class="filter-btn fa" data-tier="A">A</button>
+  <button class="filter-btn fb" data-tier="B">B</button>
+  <button class="filter-btn fc" data-tier="C">C</button>
+  <button class="filter-btn fd" data-tier="D">D</button>
+  <button class="filter-btn" data-tier="none">未评</button>
+</div>
+
+<div class="date-row">
+  <span class="filter-label">日期</span>
+  <select class="date-sel" id="year-sel">
+    <option value="all">所有年份</option>
+  </select>
+  <select class="date-sel" id="month-sel" style="display:none">
+    <option value="all">所有月份</option>
+    <option value="1">1月</option><option value="2">2月</option><option value="3">3月</option>
+    <option value="4">4月</option><option value="5">5月</option><option value="6">6月</option>
+    <option value="7">7月</option><option value="8">8月</option><option value="9">9月</option>
+    <option value="10">10月</option><option value="11">11月</option><option value="12">12月</option>
+  </select>
 </div>
 
 <div class="grid" id="grid"></div>
 
 <!-- View modal -->
 <div class="modal-bg" id="modal-bg">
-  <div class="modal" id="modal">
+  <div class="modal">
     <img class="modal-hero" id="modal-cover" src="" alt="">
     <div class="modal-content">
       <div class="modal-header">
-        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-title-wrap">
+          <div class="modal-tier-badge" id="modal-tier-badge"></div>
+          <div class="modal-title" id="modal-title"></div>
+        </div>
         <button class="modal-close" id="modal-close">✕</button>
       </div>
       <div class="modal-tags" id="modal-tags"></div>
-      <div class="modal-score-row" id="modal-score-row"></div>
-      <div class="modal-review" id="modal-review"></div>
+      <div class="tier-desc-box" id="modal-tier-desc" style="display:none"></div>
+      <div class="modal-review" id="modal-review" style="display:none"></div>
       <div class="modal-date" id="modal-date"></div>
+      <button class="modal-edit-btn" id="modal-edit-btn">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+        编辑
+      </button>
     </div>
   </div>
 </div>
 
-<!-- Add form modal -->
+<!-- Form modal -->
 <div class="form-modal-bg" id="form-modal-bg">
   <div class="form-modal">
-    <div class="form-title">添加游戏</div>
-
+    <div class="form-title" id="form-title-label">添加游戏</div>
     <div class="form-group">
       <label class="form-label">游戏名称</label>
-      <input class="form-input" id="f-title" placeholder="e.g. 艾尔登法环" />
+      <input class="form-input" id="f-title" placeholder="e.g. 艾尔登法环">
     </div>
-
     <div class="form-group">
       <label class="form-label">封面图片 URL</label>
-      <input class="form-input" id="f-cover" placeholder="Steam CDN 或其他图片链接" />
+      <input class="form-input" id="f-cover" placeholder="Steam 图片链接或其他 URL">
     </div>
-
     <div class="form-group">
-      <label class="form-label">平台 / 年份</label>
-      <input class="form-input" id="f-meta" placeholder="e.g. PC · 2022" />
+      <label class="form-label">平台 / 发行年份</label>
+      <input class="form-input" id="f-meta" placeholder="e.g. PC · 2022">
     </div>
-
     <div class="form-group">
       <label class="form-label">状态</label>
       <select class="form-select" id="f-status">
         <option value="finished">Finished</option>
         <option value="playing">Playing</option>
         <option value="dropped">Dropped</option>
-        <option value="backlog">Backlog</option>
+        <option value="backlog">Backlog（待玩）</option>
       </select>
     </div>
-
     <div class="form-group">
-      <label class="form-label">评分 (1–10)</label>
-      <div class="score-picker" id="score-picker">
-        <button class="score-option" data-v="2">2</button>
-        <button class="score-option" data-v="4">4</button>
-        <button class="score-option" data-v="6">6</button>
-        <button class="score-option" data-v="8">8</button>
-        <button class="score-option" data-v="10">10</button>
+      <label class="form-label">通关日期</label>
+      <input class="form-input" id="f-date" type="date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">档位评定</label>
+      <div class="tier-picker">
+        <div class="tier-opt ta" data-t="A"><div class="tier-opt-letter">A</div><div class="tier-opt-desc">此生难忘</div></div>
+        <div class="tier-opt tb" data-t="B"><div class="tier-opt-letter">B</div><div class="tier-opt-desc">人人必玩</div></div>
+        <div class="tier-opt tc" data-t="C"><div class="tier-opt-letter">C</div><div class="tier-opt-desc">特定人群</div></div>
+        <div class="tier-opt td" data-t="D"><div class="tier-opt-letter">D</div><div class="tier-opt-desc">不推荐</div></div>
       </div>
     </div>
-
     <div class="form-group">
       <label class="form-label">感想 / 短评</label>
       <textarea class="form-textarea" id="f-review" placeholder="写点什么…"></textarea>
     </div>
-
-    <div class="form-group">
-      <label class="form-label">完成日期</label>
-      <input class="form-input" id="f-date" type="date" />
-    </div>
-
     <div class="form-actions">
       <button class="btn-cancel" id="form-cancel">取消</button>
+      <button class="btn-delete" id="btn-delete">删除</button>
       <button class="btn-save" id="form-save">保存</button>
     </div>
   </div>
 </div>
 
 <button class="add-btn" id="add-btn">
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-    <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-  </svg>
+  <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
   添加游戏
 </button>
 
 <script>
-const STORAGE_KEY = 'gamewall_games_v1';
+const KEY = 'gamewall_v2';
+const TIER_INFO = {
+  A: { desc: '此生难忘的游戏——它改变了我对游戏这个媒介的理解，或者留下了无法磨灭的情感印记。' },
+  B: { desc: '我认为每个人都应该玩一遍的游戏，不分喜好，游戏性与品质足以打动大多数玩家。' },
+  C: { desc: '适合特定人群的游戏——如果你喜欢这个类型或风格，它会是很好的体验；否则可能不是首选。' },
+  D: { desc: '我不推荐给任何人玩的游戏。' }
+};
+const SL = { finished:'Finished', playing:'Playing', dropped:'Dropped', backlog:'Backlog' };
 
-const DEFAULT_GAMES = [
-  {
-    id: 1,
-    title: '艾尔登法环',
-    cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1245620/library_600x900.jpg',
-    meta: 'PC · 2022',
-    status: 'finished',
-    score: 10,
-    review: '难度劝退了很多人，但打过之后的成就感无与伦比。马利凯亚的战斗可能是我玩过最精彩的 Boss 战之一。开放世界设计极其克制，几乎没有废料内容，每一个角落都藏着值得探索的惊喜。',
-    date: '2022-06-12'
-  },
-  {
-    id: 2,
-    title: '博德之门3',
-    cover: 'https://cdn.akamai.steamstatic.com/steam/apps/1086940/library_600x900.jpg',
-    meta: 'PC · 2023',
-    status: 'finished',
-    score: 9,
-    review: '现代 RPG 的标杆。叙事密度、分支深度、角色塑造都达到了一个新的高度。每次读档重新选择都有截然不同的体验，单周目时长超过 120 小时仍意犹未尽。',
-    date: '2023-11-04'
-  }
+const DEFAULT = [
+  { id:1, title:'艾尔登法环', cover:'https://cdn.akamai.steamstatic.com/steam/apps/1245620/library_600x900.jpg', meta:'PC · 2022', status:'finished', tier:'B', review:'难度劝退了很多人，但打过之后的成就感无与伦比。开放世界设计极其克制，每一个角落都藏着惊喜。', date:'2022-06-12' },
+  { id:2, title:'博德之门3', cover:'https://cdn.akamai.steamstatic.com/steam/apps/1086940/library_600x900.jpg', meta:'PC · 2023', status:'finished', tier:'B', review:'现代 RPG 的标杆。叙事密度、分支深度、角色塑造都达到了新的高度。', date:'2023-11-04' }
 ];
 
-let games = [];
-let currentFilter = 'all';
-let selectedScore = null;
-let editingId = null;
+let games=[], fStatus='all', fTier='all', fYear='all', fMonth='all', selTier=null, editId=null, viewGame=null;
 
-function loadGames() {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      games = JSON.parse(stored);
-    } else {
-      games = DEFAULT_GAMES;
-      saveGames();
+function load(){ try{ const s=localStorage.getItem(KEY); games=s?JSON.parse(s):DEFAULT; if(!s)save(); }catch(e){games=DEFAULT;} }
+function save(){ localStorage.setItem(KEY,JSON.stringify(games)); }
+
+function years(){ const y=new Set(); games.forEach(g=>{if(g.date)y.add(g.date.split('-')[0]);}); return [...y].sort((a,b)=>b-a); }
+
+function refreshYears(){
+  const sel=document.getElementById('year-sel'), cur=sel.value;
+  sel.innerHTML='<option value="all">所有年份</option>';
+  years().forEach(y=>{ const o=document.createElement('option'); o.value=y; o.textContent=y+'年'; if(y===cur)o.selected=true; sel.appendChild(o); });
+}
+
+function filtered(){
+  return games.filter(g=>{
+    if(fStatus!=='all'&&g.status!==fStatus) return false;
+    if(fTier==='none'&&g.tier) return false;
+    if(fTier!=='all'&&fTier!=='none'&&g.tier!==fTier) return false;
+    if(fYear!=='all'){
+      if(!g.date) return false;
+      const [y,m]=g.date.split('-');
+      if(y!==fYear) return false;
+      if(fMonth!=='all'&&parseInt(m)!==parseInt(fMonth)) return false;
     }
-  } catch(e) {
-    games = DEFAULT_GAMES;
-  }
+    return true;
+  });
 }
 
-function saveGames() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
-}
-
-function getScoreClass(score) {
-  if (score <= 2) return 'filled-1';
-  if (score <= 4) return 'filled-2';
-  if (score <= 6) return 'filled-3';
-  if (score <= 8) return 'filled-4';
-  return 'filled-5';
-}
-
-function getStatusLabel(status) {
-  const map = { finished: 'Finished', playing: 'Playing', dropped: 'Dropped', backlog: 'Backlog' };
-  return map[status] || status;
-}
-
-function renderDots(score, size = 'small') {
-  const total = 10;
-  const cls = getScoreClass(score);
-  let html = '';
-  for (let i = 1; i <= total; i++) {
-    html += `<div class="${size === 'small' ? 'dot' : 'modal-dot'} ${i <= score ? cls : ''}"></div>`;
-  }
-  return html;
-}
-
-function renderGrid() {
-  const grid = document.getElementById('grid');
-  const filtered = currentFilter === 'all' ? games : games.filter(g => g.status === currentFilter);
-
-  updateStats();
-
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="empty-state"><div style="font-size:32px">🎮</div><p>还没有游戏，点击右下角添加吧</p></div>`;
-    return;
-  }
-
-  grid.innerHTML = filtered.map(g => `
+function render(){
+  const grid=document.getElementById('grid');
+  const list=filtered();
+  document.getElementById('stat-total').textContent=games.length;
+  document.getElementById('stat-finished').textContent=games.filter(g=>g.status==='finished').length;
+  document.getElementById('stat-a').textContent=games.filter(g=>g.tier==='A').length;
+  refreshYears();
+  if(!list.length){ grid.innerHTML='<div class="empty-state">🎮<br><br>没有符合条件的游戏</div>'; return; }
+  grid.innerHTML=list.map(g=>`
     <div class="card" data-id="${g.id}">
-      ${g.cover
-        ? `<img class="card-cover" src="${g.cover}" alt="${g.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        : ''
-      }
-      <div class="card-cover-fallback" style="${g.cover ? 'display:none' : ''}">🎮</div>
-      <div class="card-status status-${g.status}">${getStatusLabel(g.status)}</div>
+      ${g.cover?`<img class="card-cover" src="${g.cover}" alt="${g.title}" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`:'' }
+      <div class="card-cover-fallback" style="${g.cover?'display:none':''}">🎮</div>
+      ${g.tier?`<div class="card-tier tb-${g.tier.toLowerCase()}">${g.tier}</div>`:''}
+      <div class="card-status st-${g.status}">${SL[g.status]}</div>
+      <button class="card-edit" data-eid="${g.id}">
+        <svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M8.5 1.5l2 2-7 7H1.5v-2l7-7z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </button>
       <div class="card-body">
         <div class="card-title">${g.title}</div>
-        <div class="card-meta"><span>${g.meta || ''}</span></div>
-        ${g.score ? `<div class="card-score">${renderDots(g.score)}</div>` : ''}
+        <div class="card-meta">${g.meta||''}</div>
+        ${g.date?`<div class="card-date">${g.date}</div>`:''}
       </div>
-    </div>
-  `).join('');
-
-  grid.querySelectorAll('.card').forEach(card => {
-    card.addEventListener('click', () => {
-      const game = games.find(g => g.id == card.dataset.id);
-      if (game) openModal(game);
-    });
-  });
+    </div>`).join('');
+  grid.querySelectorAll('.card').forEach(c=>c.addEventListener('click',e=>{
+    if(e.target.closest('.card-edit'))return;
+    const g=games.find(x=>x.id==c.dataset.id); if(g)openView(g);
+  }));
+  grid.querySelectorAll('.card-edit').forEach(b=>b.addEventListener('click',e=>{
+    e.stopPropagation(); const g=games.find(x=>x.id==b.dataset.eid); if(g)openForm(g);
+  }));
 }
 
-function updateStats() {
-  const total = games.length;
-  const finished = games.filter(g => g.status === 'finished').length;
-  const scored = games.filter(g => g.score);
-  const avg = scored.length ? (scored.reduce((a, g) => a + g.score, 0) / scored.length).toFixed(1) : '—';
-  document.getElementById('stat-total').textContent = total;
-  document.getElementById('stat-finished').textContent = finished;
-  document.getElementById('stat-avg').textContent = avg;
-}
-
-function openModal(game) {
-  const bg = document.getElementById('modal-bg');
-  const cover = document.getElementById('modal-cover');
-  cover.src = game.cover || '';
-  cover.style.display = game.cover ? 'block' : 'none';
-  document.getElementById('modal-title').textContent = game.title;
-
-  const tagsEl = document.getElementById('modal-tags');
-  tagsEl.innerHTML = [
-    game.meta ? `<span class="tag">${game.meta}</span>` : '',
-    `<span class="tag status-${game.status}">${getStatusLabel(game.status)}</span>`
+function openView(g){
+  viewGame=g;
+  const cv=document.getElementById('modal-cover'); cv.src=g.cover||''; cv.style.display=g.cover?'block':'none';
+  document.getElementById('modal-title').textContent=g.title;
+  const tb=document.getElementById('modal-tier-badge');
+  if(g.tier){ tb.className=`modal-tier-badge tb-${g.tier.toLowerCase()}`; tb.textContent=g.tier; tb.style.display='flex'; }
+  else { tb.style.display='none'; }
+  document.getElementById('modal-tags').innerHTML=[
+    g.meta?`<span class="tag">${g.meta}</span>`:'',
+    `<span class="tag st-${g.status}">${SL[g.status]}</span>`
   ].join('');
-
-  const scoreRow = document.getElementById('modal-score-row');
-  if (game.score) {
-    scoreRow.innerHTML = `
-      <span class="modal-score-label">Score</span>
-      <div class="modal-dots">${renderDots(game.score, 'modal')}</div>
-      <span class="modal-score-text">${game.score}/10</span>
-    `;
-  } else {
-    scoreRow.innerHTML = '';
-  }
-
-  document.getElementById('modal-review').textContent = game.review || '';
-  document.getElementById('modal-date').textContent = game.date ? `完成于 ${game.date}` : '';
-
-  bg.classList.add('open');
-  document.body.style.overflow = 'hidden';
+  const db=document.getElementById('modal-tier-desc');
+  if(g.tier){ db.className=`tier-desc-box tdb-${g.tier.toLowerCase()}`; db.textContent=TIER_INFO[g.tier].desc; db.style.display='block'; }
+  else { db.style.display='none'; }
+  const rv=document.getElementById('modal-review'); rv.textContent=g.review||''; rv.style.display=g.review?'block':'none';
+  document.getElementById('modal-date').textContent=g.date?`通关于 ${g.date}`:'';
+  document.getElementById('modal-bg').classList.add('open');
+  document.body.style.overflow='hidden';
 }
+function closeView(){ document.getElementById('modal-bg').classList.remove('open'); document.body.style.overflow=''; viewGame=null; }
 
-function closeModal() {
-  document.getElementById('modal-bg').classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function openForm() {
-  editingId = null;
-  selectedScore = null;
-  document.getElementById('f-title').value = '';
-  document.getElementById('f-cover').value = '';
-  document.getElementById('f-meta').value = '';
-  document.getElementById('f-status').value = 'finished';
-  document.getElementById('f-review').value = '';
-  document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
-  document.querySelectorAll('.score-option').forEach(b => b.classList.remove('selected'));
+function openForm(g){
+  editId=g?g.id:null; selTier=g?g.tier:null;
+  document.getElementById('form-title-label').textContent=g?'编辑游戏':'添加游戏';
+  document.getElementById('f-title').value=g?g.title:'';
+  document.getElementById('f-cover').value=g?(g.cover||''):'';
+  document.getElementById('f-meta').value=g?(g.meta||''):'';
+  document.getElementById('f-status').value=g?g.status:'finished';
+  document.getElementById('f-date').value=g?(g.date||''):new Date().toISOString().split('T')[0];
+  document.getElementById('f-review').value=g?(g.review||''):'';
+  document.querySelectorAll('.tier-opt').forEach(b=>{ b.classList.remove('sel'); if(g&&b.dataset.t===g.tier)b.classList.add('sel'); });
+  document.getElementById('btn-delete').style.display=g?'block':'none';
   document.getElementById('form-modal-bg').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  document.body.style.overflow='hidden';
+}
+function closeForm(){ document.getElementById('form-modal-bg').classList.remove('open'); document.body.style.overflow=''; }
+
+function saveForm(){
+  const title=document.getElementById('f-title').value.trim();
+  if(!title){ alert('请填写游戏名称'); return; }
+  const g={ id:editId||Date.now(), title, cover:document.getElementById('f-cover').value.trim(),
+    meta:document.getElementById('f-meta').value.trim(), status:document.getElementById('f-status').value,
+    tier:selTier||null, review:document.getElementById('f-review').value.trim(), date:document.getElementById('f-date').value||null };
+  if(editId){ const i=games.findIndex(x=>x.id===editId); if(i>-1)games[i]=g; }
+  else games.unshift(g);
+  save(); render(); closeForm();
 }
 
-function closeForm() {
-  document.getElementById('form-modal-bg').classList.remove('open');
-  document.body.style.overflow = '';
+function delGame(){
+  if(!editId||!confirm('确定删除这个游戏？'))return;
+  games=games.filter(x=>x.id!==editId); save(); render(); closeForm();
 }
 
-function saveForm() {
-  const title = document.getElementById('f-title').value.trim();
-  if (!title) { alert('请填写游戏名称'); return; }
+document.getElementById('modal-close').addEventListener('click',closeView);
+document.getElementById('modal-bg').addEventListener('click',e=>{ if(e.target===e.currentTarget)closeView(); });
+document.getElementById('modal-edit-btn').addEventListener('click',()=>{ const g=viewGame; closeView(); openForm(g); });
+document.getElementById('add-btn').addEventListener('click',()=>openForm(null));
+document.getElementById('form-cancel').addEventListener('click',closeForm);
+document.getElementById('form-modal-bg').addEventListener('click',e=>{ if(e.target===e.currentTarget)closeForm(); });
+document.getElementById('form-save').addEventListener('click',saveForm);
+document.getElementById('btn-delete').addEventListener('click',delGame);
 
-  const game = {
-    id: editingId || Date.now(),
-    title,
-    cover: document.getElementById('f-cover').value.trim(),
-    meta: document.getElementById('f-meta').value.trim(),
-    status: document.getElementById('f-status').value,
-    score: selectedScore,
-    review: document.getElementById('f-review').value.trim(),
-    date: document.getElementById('f-date').value
-  };
+document.querySelectorAll('.tier-opt').forEach(b=>b.addEventListener('click',()=>{
+  const t=b.dataset.t;
+  if(selTier===t){ selTier=null; b.classList.remove('sel'); }
+  else { selTier=t; document.querySelectorAll('.tier-opt').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); }
+}));
 
-  if (editingId) {
-    const idx = games.findIndex(g => g.id === editingId);
-    if (idx > -1) games[idx] = game;
-  } else {
-    games.unshift(game);
-  }
-
-  saveGames();
-  renderGrid();
-  closeForm();
-}
-
-document.getElementById('modal-close').addEventListener('click', closeModal);
-document.getElementById('modal-bg').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
-document.getElementById('add-btn').addEventListener('click', openForm);
-document.getElementById('form-cancel').addEventListener('click', closeForm);
-document.getElementById('form-modal-bg').addEventListener('click', e => { if (e.target === e.currentTarget) closeForm(); });
-document.getElementById('form-save').addEventListener('click', saveForm);
-
-document.querySelectorAll('.score-option').forEach(btn => {
-  btn.addEventListener('click', () => {
-    selectedScore = parseInt(btn.dataset.v);
-    document.querySelectorAll('.score-option').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-  });
+document.querySelectorAll('[data-status]').forEach(b=>b.addEventListener('click',()=>{
+  fStatus=b.dataset.status;
+  document.querySelectorAll('[data-status]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render();
+}));
+document.querySelectorAll('[data-tier]').forEach(b=>b.addEventListener('click',()=>{
+  fTier=b.dataset.tier;
+  document.querySelectorAll('[data-tier]').forEach(x=>x.classList.remove('active')); b.classList.add('active'); render();
+}));
+document.getElementById('year-sel').addEventListener('change',function(){
+  fYear=this.value; fMonth='all'; document.getElementById('month-sel').value='all';
+  document.getElementById('month-sel').style.display=fYear==='all'?'none':'inline-block'; render();
 });
+document.getElementById('month-sel').addEventListener('change',function(){ fMonth=this.value; render(); });
 
-document.querySelectorAll('.filter-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    currentFilter = btn.dataset.filter;
-    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderGrid();
-  });
-});
-
-loadGames();
-renderGrid();
+load(); render();
 </script>
 </body>
 </html>
