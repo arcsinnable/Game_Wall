@@ -291,8 +291,7 @@
 // ─── 配置 ───────────────────────────────────────────────
 const SUPABASE_URL = 'https://kccnfabiihalrfygkthj.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_A6xM5UNvgRP8uus3qaACFQ_OzRKx3ZB';
-const SUPABASE_SECRET = 'sb_secret_wTLM2U7ijxHPmy95iWGmzw_z7V-oXgR'; // ← 替换成你的 Secret key
-const ADMIN_PASSWORD = 'f666666';    // ← 替换成你想要的密码
+const ADMIN_PASSWORD = 'f666666';
 // ────────────────────────────────────────────────────────
 
 const TIER_INFO = {
@@ -307,12 +306,11 @@ let games = [], fStatus='all', fTier='all', fYear='all', fMonth='all';
 let selTier=null, editId=null, viewGame=null, isAdmin=false;
 
 // ─── Supabase API ────────────────────────────────────────
-async function sbFetch(path, opts={}, useSecret=false) {
-  const key = useSecret ? SUPABASE_SECRET : SUPABASE_ANON;
+async function sbFetch(path, opts={}) {
   const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
     headers: {
-      'apikey': key,
-      'Authorization': 'Bearer ' + key,
+      'apikey': SUPABASE_ANON,
+      'Authorization': 'Bearer ' + SUPABASE_ANON,
       'Content-Type': 'application/json',
       'Prefer': opts.prefer || ''
     },
@@ -342,7 +340,7 @@ async function insertGame(g) {
     method: 'POST',
     prefer: 'return=representation',
     body: JSON.stringify(g)
-  }, true);
+  });
 }
 
 async function updateGame(id, g) {
@@ -350,11 +348,11 @@ async function updateGame(id, g) {
     method: 'PATCH',
     prefer: 'return=representation',
     body: JSON.stringify(g)
-  }, true);
+  });
 }
 
 async function deleteGame(id) {
-  return sbFetch(`games?id=eq.${id}`, { method: 'DELETE' }, true);
+  return sbFetch(`games?id=eq.${id}`, { method: 'DELETE' });
 }
 
 // ─── Render ──────────────────────────────────────────────
