@@ -1,0 +1,101 @@
+[
+  {
+    "id": 1,
+    "title": "生化危机9：安魂曲",
+    "cover": "https://i.ibb.co/zV9Z070C/resident-evil-requiem-tag-page-cover-art.avif",
+    "meta": "PS5 · 2026",
+    "status": "finished",
+    "tier": "C",
+    "review": "2026年通关的第一部游戏，这一代依然非常的好玩。\n符合之前的经典套路，一开始最恐怖，拿到枪之后就完全不吓人了。而且地图设计依然遵循“豪宅-阴沟/下水道-宗教场所/废墟-科研机构”的讨论。\n这一代双主角的设计有一些小巧思。Grace纯负责恐怖的部分，不承担数值成长的设计，那么也就不需要平衡恐怖感和数值成长，把爽的部分完全交给Leon，这很能减轻开发压力。代价则是牺牲了Grace的人气，她在我看起来没那么讨喜。\n这一代白金时间很短，冲一下三周目白金。",
+    "date": "2026-03-15",
+    "created_at": "2026-03-15T13:05:46.587889+00:00"
+  },
+  {
+    "id": 2,
+    "title": "死亡搁浅2：冥滩之上",
+    "cover": "https://i.ibb.co/hxdpVFMd/s-l1600.jpg",
+    "meta": "PS5 · 2025",
+    "status": "playing",
+    "tier": "C",
+    "review": "依旧步行模拟器，依旧快递听歌看风景。\n很喜欢这一代战斗部分的强化，操作手感的强化，以及优化后的数值。目前打到第9章",
+    "date": "2026-03-16",
+    "created_at": "2026-03-16T03:01:29.967825+00:00"
+  },
+  {
+    "id": 3,
+    "title": "喵喵的结合",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/686060/library_600x900.jpg",
+    "meta": "PC · 2026",
+    "status": "playing",
+    "tier": "C",
+    "review": "E胖最新力作，让我彻底爱上战旗，并把阈值拉的很高。各种职业和技能配合很吸引我，也很有想象力，真的很佩服E胖能把小猫这个题材做出这么多花样。当然不得不提整个游戏还是一眼美国斩杀线的光景，很经典。而且游戏也很肝，正在努力肝到最后一条线",
+    "date": "2026-03-16",
+    "created_at": "2026-03-16T09:18:43.705955+00:00"
+  },
+  {
+    "id": 4,
+    "title": "明末：渊虚之羽",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/2277560/library_600x900.jpg",
+    "meta": "PC · 2025",
+    "status": "backlog",
+    "tier": "C",
+    "review": null,
+    "date": "2026-03-16",
+    "created_at": "2026-03-16T09:20:16.731476+00:00"
+  },
+  {
+    "id": 5,
+    "title": "识质存在",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/3357650/library_600x900.jpg",
+    "meta": "PS5 · 2026",
+    "status": "backlog",
+    "tier": "C",
+    "review": null,
+    "date": "2026-03-16",
+    "created_at": "2026-03-16T09:21:41.793987+00:00"
+  },
+  {
+    "id": 6,
+    "title": "空洞骑士：丝之歌",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/1030300/library_600x900.jpg",
+    "meta": "PC · 2025",
+    "status": "backlog",
+    "tier": "C",
+    "review": null,
+    "date": "2026-03-16",
+    "created_at": "2026-03-16T09:22:46.665722+00:00"
+  },
+  {
+    "id": 7,
+    "title": "毁灭战士：黑暗纪元",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/3017860/library_600x900.jpg",
+    "meta": "PC · 2025",
+    "status": "backlog",
+    "tier": "C",
+    "review": null,
+    "date": "2026-03-16",
+    "created_at": "2026-03-16T09:23:38.329387+00:00"
+  },
+  {
+    "id": 8,
+    "title": "博德之门3",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/1086940/library_600x900.jpg",
+    "meta": "PC · 2023",
+    "status": "finished",
+    "tier": "C",
+    "review": "不喜欢CRPG的别玩",
+    "date": "2026-03-17",
+    "created_at": "2026-03-17T11:19:12.075104+00:00"
+  },
+  {
+    "id": 9,
+    "title": "艾尔登法环",
+    "cover": "https://cdn.akamai.steamstatic.com/steam/apps/1245620/library_600x900.jpg",
+    "meta": "PC/Xbox · 2022",
+    "status": "finished",
+    "tier": "B",
+    "review": "年轻人的第一款魂。但不是我的，打完一遍就不想再打了。",
+    "date": "2022-03-02",
+    "created_at": "2026-03-17T11:23:38.600246+00:00"
+  }
+]
