@@ -305,13 +305,17 @@
 
 <script>
 // ─── 配置 ───────────────────────────────────────────────
-// 请修改为你的 GitHub 用户名、仓库名和分支
-const GITHUB_OWNER = 'arcsinnable';
-const GITHUB_REPO = 'Game_Wall';
-const GITHUB_PATH = 'games.json';        // 文件在仓库中的路径
-const GITHUB_BRANCH = 'main';            // 或 master
-const HARDCODED_TOKEN = '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';   
+// 后端 API（Cloudflare Worker）地址：改成你自己的
+const API_BASE = 'https://https://billowing-cake-0a1a.1665543950.workers.dev/';
 
+// 下面这些 GitHub 变量以后不再需要了（保留也行，但不会再用）
+// const GITHUB_OWNER = 'arcsinnable';
+// const GITHUB_REPO = 'Game_Wall';
+// const GITHUB_PATH = 'games.json';
+// const GITHUB_BRANCH = 'main';
+
+// 不要在前端存/写 token
+const HARDCODED_TOKEN = '';
 const ADMIN_PASSWORD = 'f666666';        // 编辑模式密码，可自行修改
 
 // ─── 数据 & 状态 ────────────────────────────────────────
@@ -327,68 +331,32 @@ let games = [], fStatus='all', fTier='all', fYear='all', fMonth='all';
 let selTier=null, editId=null, viewGame=null, isAdmin=false;
 
 // GitHub 文件 SHA 值，读取时获得，保存后更新
-let githubSha = null;
-let githubToken = HARDCODED_TOKEN || localStorage.getItem('gh_token') || '';
+let githubSha = null; // 不再使用，可留着
+let githubToken = ''; // 不再使用，可留着
 
-// ─── GitHub API 封装 ────────────────────────────────────
-function utf8ToBase64(str) {
-  // 支持中文等 Unicode
-  return btoa(unescape(encodeURIComponent(str)));
+// ─── Worker API 封装（替代 GitHub API + Token） ─────────────
+async function fetchGamesFromServer() {
+  const res = await fetch(`${API_BASE}/games`, { method: 'GET' });
+  if (!res.ok) throw new Error(`读取失败 (${res.status}): ${await res.text()}`);
+  return await res.json();
 }
 
-async function fetchFileFromGitHub() {
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?ref=${GITHUB_BRANCH}`;
-  const headers = {};
-  if (githubToken) headers['Authorization'] = 'token ' + githubToken;
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`读取文件失败 (${res.status}): ${err}`);
-  }
-  const data = await res.json();
-  // data.content 是 base64，可能有换行
-  const raw = atob(data.content.replace(/\n/g, ''));
-  githubSha = data.sha;
-  return JSON.parse(raw);
-}
-
-async function saveFileToGitHub(contentArray) {
-  if (!githubToken) {
-    throw new Error('缺少 GitHub Token，请先设置。');
-  }
-  const contentStr = JSON.stringify(contentArray, null, 2);
-  const body = {
-    message: 'Update games.json via Game Wall',
-    content: utf8ToBase64(contentStr),
-    sha: githubSha,
-    branch: GITHUB_BRANCH
-  };
-  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
-  const res = await fetch(url, {
-    method: 'PUT',
-    headers: {
-      'Authorization': 'token ' + githubToken,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(body)
+async function saveGamesToServer(contentArray) {
+  const res = await fetch(`${API_BASE}/games`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(contentArray)
   });
-  if (!res.ok) {
-    const err = await res.json();
-    if (res.status === 409) {
-      throw new Error('文件已被其他操作修改，请刷新页面后重试。');
-    }
-    throw new Error('保存失败：' + (err.message || res.status));
-  }
-  const data = await res.json();
-  githubSha = data.content.sha;
+  if (!res.ok) throw new Error(`保存失败 (${res.status}): ${await res.text()}`);
 }
+
 
 // ─── 数据操作 ────────────────────────────────────────────
 async function loadGames() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    games = await fetchFileFromGitHub();
+    games = await fetchGamesFromServer();
   } catch(e) {
     console.error('加载失败', e);
     // 如果加载失败，显示一条消息并保留空数组
@@ -402,7 +370,7 @@ async function loadGames() {
 async function syncAndRender() {
   // 将当前 games 数组写回 GitHub，成功后重新渲染
   try {
-    await saveFileToGitHub(games);
+    await saveFileToServer(games);
     render();
   } catch(e) {
     alert('同步失败：' + e.message);
@@ -547,11 +515,6 @@ async function saveForm() {
   const title = document.getElementById('f-title').value.trim();
   if(!title) { alert('请填写游戏名称'); return; }
 
-  if (!githubToken) {
-    document.getElementById('token-modal-bg').classList.add('open');
-    return;
-  }
-
   const saveBtn = document.getElementById('form-save');
   saveBtn.disabled = true; saveBtn.textContent = '保存中…';
 
@@ -587,10 +550,6 @@ async function saveForm() {
 
 async function delGame() {
   if(!editId || !confirm('确定删除这个游戏？')) return;
-  if (!githubToken) {
-    document.getElementById('token-modal-bg').classList.add('open');
-    return;
-  }
   try {
     games = games.filter(x => x.id != editId);
     await syncAndRender();
@@ -609,9 +568,6 @@ function setAdmin(val) {
   btn.classList.toggle('active', val);
   fab.classList.toggle('visible', val);
   // 如果进入编辑模式且没有 token（且没有硬编码），才弹出设置框
-  if (val && !githubToken) {
-    document.getElementById('token-modal-bg').classList.add('open');
-  }
   render();
 }
 
