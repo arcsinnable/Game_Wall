@@ -282,6 +282,22 @@
   </div>
 </div>
 
+<!-- Token modal (for GitHub write) -->
+<div class="modal-bg" id="token-modal-bg">
+  <div class="pw-modal">
+    <div class="pw-title">GitHub Token</div>
+    <div class="pw-sub">需要仓库写入权限的 Personal Access Token。<br>Token 仅保存在本地浏览器。</div>
+    <div class="form-group">
+      <input class="form-input" id="token-input" type="password" placeholder="ghp_xxxxxxxxxxxx" autocomplete="off">
+    </div>
+    <div class="pw-error" id="token-error"></div>
+    <div class="pw-actions">
+      <button class="btn-cancel" id="token-cancel">取消</button>
+      <button class="btn-save" id="token-confirm">保存 Token</button>
+    </div>
+  </div>
+</div>
+
 <button class="add-btn" id="add-btn">
   <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
   添加游戏
@@ -289,11 +305,16 @@
 
 <script>
 // ─── 配置 ───────────────────────────────────────────────
-const SUPABASE_URL = 'https://kccnfabiihalrfygkthj.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_A6xM5UNvgRP8uus3qaACFQ_OzRKx3ZB';
-const ADMIN_PASSWORD = 'f666666';
-// ────────────────────────────────────────────────────────
+// 请修改为你的 GitHub 用户名、仓库名和分支
+const GITHUB_OWNER = 'arcsinnable';
+const GITHUB_REPO = 'Game_Wall';
+const GITHUB_PATH = 'games.json';        // 文件在仓库中的路径
+const GITHUB_BRANCH = 'main';            // 或 master
+const HARDCODED_TOKEN = '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';   
 
+const ADMIN_PASSWORD = 'f666666';        // 编辑模式密码，可自行修改
+
+// ─── 数据 & 状态 ────────────────────────────────────────
 const TIER_INFO = {
   A: { desc: '此生难忘的游戏——它改变了我对游戏这个媒介的理解，或者留下了无法磨灭的情感印记。' },
   B: { desc: '我认为每个人都应该玩一遍的游戏，不分喜好，游戏性与品质足以打动大多数玩家。' },
@@ -305,57 +326,95 @@ const SL = { finished:'Finished', playing:'Playing', dropped:'Dropped', backlog:
 let games = [], fStatus='all', fTier='all', fYear='all', fMonth='all';
 let selTier=null, editId=null, viewGame=null, isAdmin=false;
 
-// ─── Supabase API ────────────────────────────────────────
-async function sbFetch(path, opts={}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    headers: {
-      'apikey': SUPABASE_ANON,
-      'Authorization': 'Bearer ' + SUPABASE_ANON,
-      'Content-Type': 'application/json',
-      'Prefer': opts.prefer || ''
-    },
-    ...opts
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+// GitHub 文件 SHA 值，读取时获得，保存后更新
+let githubSha = null;
+let githubToken = HARDCODED_TOKEN || localStorage.getItem('gh_token') || '';
+
+// ─── GitHub API 封装 ────────────────────────────────────
+function utf8ToBase64(str) {
+  // 支持中文等 Unicode
+  return btoa(unescape(encodeURIComponent(str)));
 }
 
+async function fetchFileFromGitHub() {
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}?ref=${GITHUB_BRANCH}`;
+  const headers = {};
+  if (githubToken) headers['Authorization'] = 'token ' + githubToken;
+  const res = await fetch(url, { headers });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`读取文件失败 (${res.status}): ${err}`);
+  }
+  const data = await res.json();
+  // data.content 是 base64，可能有换行
+  const raw = atob(data.content.replace(/\n/g, ''));
+  githubSha = data.sha;
+  return JSON.parse(raw);
+}
+
+async function saveFileToGitHub(contentArray) {
+  if (!githubToken) {
+    throw new Error('缺少 GitHub Token，请先设置。');
+  }
+  const contentStr = JSON.stringify(contentArray, null, 2);
+  const body = {
+    message: 'Update games.json via Game Wall',
+    content: utf8ToBase64(contentStr),
+    sha: githubSha,
+    branch: GITHUB_BRANCH
+  };
+  const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${GITHUB_PATH}`;
+  const res = await fetch(url, {
+    method: 'PUT',
+    headers: {
+      'Authorization': 'token ' + githubToken,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) {
+    const err = await res.json();
+    if (res.status === 409) {
+      throw new Error('文件已被其他操作修改，请刷新页面后重试。');
+    }
+    throw new Error('保存失败：' + (err.message || res.status));
+  }
+  const data = await res.json();
+  githubSha = data.content.sha;
+}
+
+// ─── 数据操作 ────────────────────────────────────────────
 async function loadGames() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<div class="loading">Loading...</div>';
   try {
-    const data = await sbFetch('games?select=*&order=created_at.desc');
-    games = data || [];
+    games = await fetchFileFromGitHub();
   } catch(e) {
     console.error('加载失败', e);
+    // 如果加载失败，显示一条消息并保留空数组
+    grid.innerHTML = `<div class="empty-state">😵<br><br>无法加载数据：${e.message}</div>`;
     games = [];
+    return;
   }
   render();
 }
 
-async function insertGame(g) {
-  return sbFetch('games?select=*', {
-    method: 'POST',
-    prefer: 'return=representation',
-    body: JSON.stringify(g)
-  });
+async function syncAndRender() {
+  // 将当前 games 数组写回 GitHub，成功后重新渲染
+  try {
+    await saveFileToGitHub(games);
+    render();
+  } catch(e) {
+    alert('同步失败：' + e.message);
+    // 失败后可能需要重新加载以获取最新 sha
+    if (e.message.includes('409') || e.message.includes('刷新')) {
+      // 自动重新加载
+      await loadGames();
+    }
+  }
 }
 
-async function updateGame(id, g) {
-  return sbFetch(`games?id=eq.${id}`, {
-    method: 'PATCH',
-    prefer: 'return=representation',
-    body: JSON.stringify(g)
-  });
-}
-
-async function deleteGame(id) {
-  return sbFetch(`games?id=eq.${id}`, { method: 'DELETE' });
-}
-
-// ─── Render ──────────────────────────────────────────────
+// ─── 过滤与渲染 ──────────────────────────────────────────
 function years() {
   const y = new Set();
   games.forEach(g => { if(g.date) y.add(g.date.split('-')[0]); });
@@ -430,7 +489,7 @@ function render() {
   }
 }
 
-// ─── View modal ──────────────────────────────────────────
+// ─── 详情弹窗 ────────────────────────────────────────────
 function openView(g) {
   viewGame = g;
   const cv = document.getElementById('modal-cover');
@@ -463,7 +522,7 @@ function closeView() {
   document.body.style.overflow = ''; viewGame = null;
 }
 
-// ─── Form modal ──────────────────────────────────────────
+// ─── 表单弹窗（添加/编辑） ────────────────────────────────
 function openForm(g) {
   editId = g ? g.id : null; selTier = g ? g.tier : null;
   document.getElementById('form-title-label').textContent = g ? '编辑游戏' : '添加游戏';
@@ -488,6 +547,11 @@ async function saveForm() {
   const title = document.getElementById('f-title').value.trim();
   if(!title) { alert('请填写游戏名称'); return; }
 
+  if (!githubToken) {
+    document.getElementById('token-modal-bg').classList.add('open');
+    return;
+  }
+
   const saveBtn = document.getElementById('form-save');
   saveBtn.disabled = true; saveBtn.textContent = '保存中…';
 
@@ -502,15 +566,18 @@ async function saveForm() {
   };
 
   try {
-    if(editId) {
-      const res = await updateGame(editId, payload);
-      const idx = games.findIndex(x => x.id===editId);
-      if(idx > -1) games[idx] = res ? res[0] : { ...payload, id: editId };
+    if (editId) {
+      const idx = games.findIndex(x => x.id == editId);
+      if (idx > -1) {
+        games[idx] = { ...games[idx], ...payload };
+      }
     } else {
-      const res = await insertGame(payload);
-      if(res && res[0]) games.unshift(res[0]);
+      // 新增：生成一个简易 ID（这里使用时间戳，也可改用 uuid）
+      const newId = Date.now();
+      games.unshift({ id: newId, ...payload, created_at: new Date().toISOString() });
     }
-    render(); closeForm();
+    await syncAndRender();
+    closeForm();
   } catch(e) {
     alert('保存失败：' + e.message);
   } finally {
@@ -520,16 +587,20 @@ async function saveForm() {
 
 async function delGame() {
   if(!editId || !confirm('确定删除这个游戏？')) return;
+  if (!githubToken) {
+    document.getElementById('token-modal-bg').classList.add('open');
+    return;
+  }
   try {
-    await deleteGame(editId);
-    games = games.filter(x => x.id !== editId);
-    render(); closeForm();
+    games = games.filter(x => x.id != editId);
+    await syncAndRender();
+    closeForm();
   } catch(e) {
     alert('删除失败：' + e.message);
   }
 }
 
-// ─── Admin / Password ────────────────────────────────────
+// ─── 管理员密码 ──────────────────────────────────────────
 function setAdmin(val) {
   isAdmin = val;
   const btn = document.getElementById('admin-btn');
@@ -537,6 +608,10 @@ function setAdmin(val) {
   btn.textContent = val ? '退出编辑' : '编辑模式';
   btn.classList.toggle('active', val);
   fab.classList.toggle('visible', val);
+  // 如果进入编辑模式且没有 token（且没有硬编码），才弹出设置框
+  if (val && !githubToken) {
+    document.getElementById('token-modal-bg').classList.add('open');
+  }
   render();
 }
 
@@ -555,19 +630,42 @@ function closePw() {
 }
 
 document.getElementById('pw-confirm').addEventListener('click', () => {
-  const val = document.getElementById('pw-input').value;
-  if(val === ADMIN_PASSWORD) { closePw(); setAdmin(true); }
-  else { document.getElementById('pw-error').textContent = '密码错误'; }
+  if(document.getElementById('pw-input').value === ADMIN_PASSWORD) {
+    closePw();
+    setAdmin(true);
+  } else {
+    document.getElementById('pw-error').textContent = '密码错误';
+  }
 });
 
 document.getElementById('pw-input').addEventListener('keydown', e => {
   if(e.key === 'Enter') document.getElementById('pw-confirm').click();
 });
-
 document.getElementById('pw-cancel').addEventListener('click', closePw);
 document.getElementById('pw-modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closePw(); });
 
-// ─── Other events ────────────────────────────────────────
+// ─── Token 管理 ──────────────────────────────────────────
+function closeToken() {
+  document.getElementById('token-modal-bg').classList.remove('open');
+}
+
+document.getElementById('token-confirm').addEventListener('click', () => {
+  const tok = document.getElementById('token-input').value.trim();
+  if (!tok) {
+    document.getElementById('token-error').textContent = '请输入 Token';
+    return;
+  }
+  githubToken = tok;
+  localStorage.setItem('gh_token', tok);
+  closeToken();
+  // 重新加载一下数据，确保 token 能正常工作
+  loadGames();
+});
+
+document.getElementById('token-cancel').addEventListener('click', closeToken);
+document.getElementById('token-modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closeToken(); });
+
+// ─── 其他事件 ────────────────────────────────────────────
 document.getElementById('modal-close').addEventListener('click', closeView);
 document.getElementById('modal-bg').addEventListener('click', e => { if(e.target===e.currentTarget) closeView(); });
 document.getElementById('modal-edit-btn').addEventListener('click', () => { const g=viewGame; closeView(); openForm(g); });
@@ -599,7 +697,7 @@ document.getElementById('year-sel').addEventListener('change', function() {
 });
 document.getElementById('month-sel').addEventListener('change', function() { fMonth=this.value; render(); });
 
-// ─── Init ────────────────────────────────────────────────
+// ─── 启动 ────────────────────────────────────────────────
 loadGames();
 </script>
 </body>
