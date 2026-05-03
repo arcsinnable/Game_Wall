@@ -1,8 +1,3 @@
-const GITHUB_OWNER = 'arcsinnable';   // 例如 'sinnable'
-const GITHUB_REPO = 'Game_Wall';         // 例如 'my-game-wall'
-const GITHUB_PATH = 'games.json';     // 如果文件在根目录就是 'games.json'
-const GITHUB_BRANCH = 'main';         // 也可能是 'master'
-
 [
   {
     "id": 1,
